@@ -55,7 +55,7 @@ function App() {
 
     
 
-    function editpop(id){
+    function editpop(id){      
       handleShow();
     }
     const handleFilter = (event) => {
@@ -81,25 +81,25 @@ function App() {
   
   return (
     <>
-    <Container fluid="md">
+    <Container fluid="sm">
       <Row>
-        <Col><h1> To Do List</h1></Col>
+        <Col sm={8}><h1 className="text-center"> TODO LIST</h1></Col>
       </Row>
       <Row>
-        <Col xs lg="2">
+        <Col sm={6}>
           <Button onClick={handleShow}>Add task</Button>
           </Col>
-          <Col xs lg="2">
+          <Col sm={2}>
           <Filter handleFilter ={handleFilter}></Filter>
           </Col>
       </Row>
       <Row>
-        <Col xl lg="4">
-        <Table striped bordered hover className="mt-2">
+        <Col sm={8}>
+        <Table striped bordered hover responsive = "sm" className="mt-2">
       <thead>
       <tr>
-        <td><b>Title</b></td>
-        <td><b>Action</b></td>
+        <td className="text-center"><b>Title</b></td>
+        <td className="text-center"><b>Action</b></td>
       </tr>
       </thead>
       <tbody>
@@ -132,10 +132,11 @@ function App() {
         position="top-center"
         toastOptions={{
           style: {
-            fontSize: '1.4rem',
+            fontSize: '1.1rem',
           },
         }}
       />
+      
     </>
     
     
@@ -171,16 +172,15 @@ function TodoList({editpop,item,onRemoveItem}){
   return (
     <>
     <tr>
-      <td>
-      <Form.Check
-            inline
-            name="checkbox"
-            type="checkbox"
-            checked={checked ? 'checked' : ''}
-          />
-        
-          <p>{item.title}</p> <p className="time">{item.time}</p></td> 
-    <td><Button onClick ={() => editpop(item.id)}>Edit</Button> || <Button onClick ={()=>onRemoveItem(item.id)}>Delete</Button></td>
+      <td>              
+          <p><input name="checkbox" type="checkbox" class="form-check-input" checked={checked ? 'checked' : ''}></input> {item.title}</p>
+          <p className="time">{item.time}</p>
+          </td> 
+    <td>
+      <Button onClick ={() => editpop(item.id)} variant = "warning" className="px-3">Edit</Button>
+      &nbsp;
+      <Button onClick ={()=>onRemoveItem(item.id)} variant = "danger" className="px-3">Delete</Button>
+      </td>
     </tr>
     </>
   )
