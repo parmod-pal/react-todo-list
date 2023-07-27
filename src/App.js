@@ -3,12 +3,15 @@ import {toast, Toaster } from 'react-hot-toast';
 import { useState } from "react";
 import { Modal, Button, Form,Table,Container,Row,Col } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import TodoFormEdit from './TodoFormEdit';
+import TodoForm from './TodoForm';
 function App() {
   const[show,setShow] = useState(false);
   const[list,setList] = useState([]);
   const[count,setIndex] = useState(1);
   const [filteredList, setFilteredList] = useState(list);
+  const [currentList, setCurrentList] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleShow = () => setShow(true);
   const handleClose = () => setShow(false);
@@ -26,7 +29,7 @@ function App() {
     if (form.status.value === '') {
       toast.error('Please select status');
       return;
-    }
+    } 
     const newlist = [...list,
       {
           id: count,
@@ -41,9 +44,6 @@ function App() {
     toast.success('Task added successfully');
   }
   
-
- 
-
     function onRemoveItem(itemToRemove) {
       const newItems = list.filter((item) => {
         return item.id !== itemToRemove;
@@ -53,10 +53,15 @@ function App() {
       setFilteredList(newItems);
     }
 
-    
-
-    function editpop(id){      
+    function addTaskModal(){
+      setIsEditing(false); 
       handleShow();
+    }
+
+    function editpop(item){   
+      setIsEditing(true); 
+      handleShow();
+      setCurrentList({ ...item });
     }
     const handleFilter = (event) => {
       var query = event.target.value; 
@@ -73,28 +78,40 @@ function App() {
 
     }
 
-   
-
-    
-    
-    
+    function onEditInputChange(evt) {
+      setCurrentList({ ...currentList, [evt.target.name]: evt.target.value});
+    }
   
+    function handleUpdateTodo(id, currentList) {
+      const updatedItem = list.map((list) => {
+        return list.id === id ? currentList : list;
+      });
+      setIsEditing(false);
+      setList(updatedItem);
+      setFilteredList(updatedItem);
+      handleClose();
+    }
+
+    function onEditFormSubmit(e) {
+       e.preventDefault();
+      handleUpdateTodo(currentList.id, currentList);
+    }
   return (
     <>
     <Container fluid="sm">
       <Row>
-        <Col sm={8}><h1 className="text-center"> TODO LIST</h1></Col>
+        <Col sm={'8'}><h1 className="text-center"> TODO LIST</h1></Col>
       </Row>
       <Row>
-        <Col sm={6}>
-          <Button onClick={handleShow}>Add task</Button>
+        <Col sm={'6'}>
+          <Button onClick={addTaskModal}>Add task</Button>
           </Col>
-          <Col sm={2}>
+          <Col sm={'2'}>
           <Filter handleFilter ={handleFilter}></Filter>
           </Col>
       </Row>
       <Row>
-        <Col sm={8}>
+        <Col sm={'8'}>
         <Table striped bordered hover responsive = "sm" className="mt-2">
       <thead>
       <tr>
@@ -109,18 +126,26 @@ function App() {
         </tbody> </Table>
         </Col>
         </Row>     
-            
     </Container>    
-    
     <Modal show={show}
         onHide={handleClose}
         backdrop="static"
         keyboard={false} aria-labelledby="contained-modal-title-vcenter">
         <Modal.Header>
-          <Modal.Title>ADD TODO</Modal.Title>
+          <Modal.Title> {isEditing ? 'EDIT TODO':'ADD TODO' }</Modal.Title>
         </Modal.Header>
-        <Modal.Body>        
-          <TodoForm onSubmit={onSubmit}></TodoForm>
+        <Modal.Body> 
+        {isEditing ? (       
+          <TodoFormEdit 
+          onEditInputChange={onEditInputChange}
+          currentList={currentList}
+          onEditFormSubmit={onEditFormSubmit}></TodoFormEdit>
+        ):(
+         <TodoForm  
+             list={list} 
+             onSubmit={onSubmit}>
+             </TodoForm>
+        )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
@@ -136,34 +161,10 @@ function App() {
           },
         }}
       />
-      
     </>
-    
-    
   );
 }
 
-function TodoForm({onSubmit}){
-  return(
-    <>
-     <Form onSubmit={onSubmit}>
-      <Form.Group controlId="title">
-        <Form.Label>Title</Form.Label>
-        <Form.Control placeholder="Enter title" name="title" />        
-      </Form.Group>
-      <Form.Group controlId="status">
-        <Form.Label>Status</Form.Label>
-        <Form.Select name="status">
-          <option value="">Select Status</option>
-          <option value="incomplete">Incomplete</option>
-          <option value="complete">Complete</option>
-          </Form.Select>
-          </Form.Group>
-          <Button variant="primary" type="submit" block className="mt-2">Add </Button>
-    </Form>
-    </>
-  )
-}
 
 function TodoList({editpop,item,onRemoveItem}){
   if(item.status === "complete"){
@@ -173,11 +174,11 @@ function TodoList({editpop,item,onRemoveItem}){
     <>
     <tr>
       <td>              
-          <p><input name="checkbox" type="checkbox" class="form-check-input" checked={checked ? 'checked' : ''}></input> {item.title}</p>
+          <p><input name="checkbox" type="checkbox" class="form-check-input" checked={checked ? 'checked' : ''}></input> {item.title}, {item.status}</p>
           <p className="time">{item.time}</p>
           </td> 
     <td>
-      <Button onClick ={() => editpop(item.id)} variant = "warning" className="px-3">Edit</Button>
+      <Button onClick ={() => editpop(item)} variant = "warning" className="px-3">Edit</Button>
       &nbsp;
       <Button onClick ={()=>onRemoveItem(item.id)} variant = "danger" className="px-3">Delete</Button>
       </td>
